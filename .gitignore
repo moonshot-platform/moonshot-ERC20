@@ -1,0 +1,3 @@
+secrets.env
+build/
+node_modules/
