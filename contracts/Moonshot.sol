@@ -6,7 +6,7 @@
 ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║███████║██║  ██║╚██████╔╝   ██║   
 ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝  
 
- Moneshot is a deflationary defi meme token
+ Moonshot is a deflationary defi meme token
  For every transaction, 4% goes to Holders and 6% goes to the Liqduity Pool
  As the burn address participates as a holder, the supply is forever decreasing
  This is a fork of SafeMoon
@@ -747,7 +747,7 @@ contract Moonshot is Context, IERC20, Ownable {
         _rOwned[_msgSender()] = _rTotal;
         
         // BSC MainNet, Pancakeswap Router
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
         // Ropsten, Uniswap Router
         //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
@@ -767,6 +767,12 @@ contract Moonshot is Context, IERC20, Ownable {
         _isExcludedFromFee[address(this)] = true;
         
         emit Transfer(address(0), _msgSender(), _tTotal);
+    }
+
+    function setRouterAddress(address newRouter) public onlyOwner() {
+        IUniswapV2Router02 _newPancakeRouter = IUniswapV2Router02(newRouter);
+        uniswapV2Pair = IUniswapV2Factory(_newPancakeRouter.factory()).createPair(address(this), _newPancakeRouter.WETH());
+        uniswapV2Router = _newPancakeRouter;
     }
 
     function name() public view returns (string memory) {
