@@ -457,7 +457,7 @@ contract Ownable is Context {
         _owner = newOwner;
     }
 
-    function geUnlockTime() public view returns (uint256) {
+    function getUnlockTime() public view returns (uint256) {
         return _lockTime;
     }
 
@@ -475,6 +475,7 @@ contract Ownable is Context {
         require(now > _lockTime , "Contract is locked");
         emit OwnershipTransferred(_owner, _previousOwner);
         _owner = _previousOwner;
+        _previousOwner = address(0);
     }
 }
 
@@ -703,8 +704,9 @@ contract Moonshot is Context, IERC20, Ownable {
     mapping (address => mapping (address => uint256)) private _allowances;
 
     mapping (address => bool) private _isExcludedFromFee;
-
     mapping (address => bool) private _isExcluded;
+    mapping( address => bool) private _isBlackListed;
+
     address[] private _excluded;
    
     uint256 private constant MAX = ~uint256(0);
@@ -712,9 +714,9 @@ contract Moonshot is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private _name = "Moonshot";
-    string private _symbol = "MSHOT";
-    uint8 private _decimals = 9;
+    string private constant _name = "Moonshot";
+    string private constant _symbol = "MSHOT";
+    uint8 private constant _decimals = 9;
     
     uint256 public _taxFee = 4;
     uint256 private _previousTaxFee = _taxFee;
@@ -728,11 +730,11 @@ contract Moonshot is Context, IERC20, Ownable {
     IUniswapV2Router02 public uniswapV2Router;
     address public uniswapV2Pair;
     
-    bool inSwapAndLiquify;
+    bool private inSwapAndLiquify;
     bool public swapAndLiquifyEnabled = true;
     
     uint256 public _maxTxAmount = 5000000 * 10**6 * 10**9;
-    uint256 private numTokensSellToAddToLiquidity = 500000 * 10**6 * 10**9;
+    uint256 public numTokensSellToAddToLiquidity = 500000 * 10**6 * 10**9;
     
     event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
     event SwapAndLiquifyEnabledUpdated(bool enabled);
@@ -777,34 +779,40 @@ contract Moonshot is Context, IERC20, Ownable {
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
 
-    function setRouterAddress(address newRouter) public onlyOwner() {
-        IUniswapV2Router02 _newPancakeRouter = IUniswapV2Router02(newRouter);
-        uniswapV2Pair = IUniswapV2Factory(_newPancakeRouter.factory()).createPair(address(this), _newPancakeRouter.WETH());
-        uniswapV2Router = _newPancakeRouter;
+    function setPancakeRouterAddress(address newRouter) external onlyOwner() {
+        uniswapV2Router = IUniswapV2Router02(newRouter);
     }
 
-    function setmoonshotFundAddress(address newAddress) external onlyOwner() {
+    function setPancakePairAddress(address newPair) external onlyOwner() {
+        uniswapV2Pair = newPair;
+    }
+
+    function setMoonshotFundAddress(address newAddress) external onlyOwner() {
         moonshotFundAddress = payable(newAddress);
     }
 
-    function setTaxes(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newMarketingfee) external onlyOwner() {
+   function setFees(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newMarketingFee) external onlyOwner() {
+        
+        require( (newRewardFee + newLiquidityFee + newMarketingFee) <= 10, "Total fees must be <= 10" );
+        
         _taxFee = newRewardFee;
         _liquidityFee = newLiquidityFee;
-        _marketingFee = newMarketingfee;
+        _marketingFee = newMarketingFee;
         
         _totalLiqFee = _liquidityFee.add(_marketingFee);
         _prevTotalLiqFee = _totalLiqFee;
+
     }
 
-    function name() public view returns (string memory) {
+    function name() public pure returns (string memory) {
         return _name;
     }
 
-    function symbol() public view returns (string memory) {
+    function symbol() public pure returns (string memory) {
         return _symbol;
     }
 
-    function decimals() public view returns (uint8) {
+    function decimals() public pure returns (uint8) {
         return _decimals;
     }
 
@@ -817,16 +825,16 @@ contract Moonshot is Context, IERC20, Ownable {
         return tokenFromReflection(_rOwned[account]);
     }
 
-    function transfer(address recipient, uint256 amount) public override returns (bool) {
+    function transfer(address recipient, uint256 amount) external override returns (bool) {
         _transfer(_msgSender(), recipient, amount);
         return true;
     }
 
-    function allowance(address owner, address spender) public view override returns (uint256) {
+    function allowance(address owner, address spender) external view override returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    function approve(address spender, uint256 amount) public override returns (bool) {
+    function approve(address spender, uint256 amount) external override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
@@ -837,21 +845,21 @@ contract Moonshot is Context, IERC20, Ownable {
         return true;
     }
 
-    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue) external virtual returns (bool) {
         _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
         return true;
     }
 
-    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue) external virtual returns (bool) {
         _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
         return true;
     }
 
-    function isExcludedFromReward(address account) public view returns (bool) {
+    function isExcludedFromReward(address account) external view returns (bool) {
         return _isExcluded[account];
     }
 
-    function totalFees() public view returns (uint256) {
+    function totalFees() external view returns (uint256) {
         return _tFeeTotal;
     }
 
@@ -864,7 +872,7 @@ contract Moonshot is Context, IERC20, Ownable {
         _tFeeTotal = _tFeeTotal.add(tAmount);
     }
 
-    function reflectionFromToken(uint256 tAmount, bool deductTransferFee) public view returns(uint256) {
+    function reflectionFromToken(uint256 tAmount, bool deductTransferFee) external view returns(uint256) {
         require(tAmount <= _tTotal, "Amount must be less than supply");
         if (!deductTransferFee) {
             (uint256 rAmount,,,,,) = _getValues(tAmount);
@@ -877,12 +885,13 @@ contract Moonshot is Context, IERC20, Ownable {
 
     function tokenFromReflection(uint256 rAmount) public view returns(uint256) {
         require(rAmount <= _rTotal, "Amount must be less than total reflections");
-        uint256 currentRate =  _getRate();
+        uint256 currentRate = _getRate();
         return rAmount.div(currentRate);
     }
 
-    function excludeFromReward(address account) public onlyOwner() {
+    function excludeFromReward(address account) external onlyOwner() {
         require(!_isExcluded[account], "Account is already excluded");
+        require(_excluded.length < 50, "Excluded list is too long");
         if(_rOwned[account] > 0) {
             _tOwned[account] = tokenFromReflection(_rOwned[account]);
         }
@@ -891,10 +900,12 @@ contract Moonshot is Context, IERC20, Ownable {
     }
 
     function includeInReward(address account) external onlyOwner() {
-        require(_isExcluded[account], "Account is already excluded");
+        require(_isExcluded[account], "Account is already included");
         for (uint256 i = 0; i < _excluded.length; i++) {
             if (_excluded[i] == account) {
                 _excluded[i] = _excluded[_excluded.length - 1];
+                uint256 currentRate = _getRate();
+                _rOwned[account] = _tOwned[account].mul(currentRate);
                 _tOwned[account] = 0;
                 _isExcluded[account] = false;
                 _excluded.pop();
@@ -903,34 +914,56 @@ contract Moonshot is Context, IERC20, Ownable {
         }
     }
     
-    function excludeFromFee(address account) public onlyOwner {
+    function excludeFromFee(address account) external onlyOwner {
         _isExcludedFromFee[account] = true;
     }
     
-    function includeInFee(address account) public onlyOwner {
+    function includeInFee(address account) external onlyOwner {
         _isExcludedFromFee[account] = false;
     }
    
     function setMaxTxPercent(uint256 maxTxPercent) external onlyOwner() {
+        require( maxTxPercent > 0 && maxTxPercent <= 100 , "maxTxPercent must be > 0 and <= 100");
+        
         _maxTxAmount = _tTotal.mul(maxTxPercent).div(
             10**2
         );
     }
 
-    function setSwapAndLiquifyEnabled(bool _enabled) public onlyOwner {
+    function setSwapAndLiquifyEnabled(bool _enabled) external onlyOwner {
         swapAndLiquifyEnabled = _enabled;
         emit SwapAndLiquifyEnabledUpdated(_enabled);
     }
     
-     //to recieve ETH from uniswapV2Router when swaping
-    receive() external payable {}
+    function addToBlackList(address account) external onlyOwner {
+        _isBlackListed[ account ] = true;
+    }
 
+    function delFromBlackList(address account) external onlyOwner {
+        _isBlackListed[ account ] = false;
+    }
+
+    function isBlackListed(address account) external view returns(bool) {
+        return _isBlackListed[ account ];
+    }
+
+    function isExcludedFromFee(address account) external view returns(bool) {
+        return _isExcludedFromFee[account];
+    }
+    
+    function setNumTokensSellToAddToLiquidity(uint256 amount) external onlyOwner {
+        numTokensSellToAddToLiquidity = amount;
+    }
+
+    // contract gains non-withdrawable BNB from swapAndLiquify function
+    function rescueBNB(uint256 amount) external onlyOwner {
+        payable( msg.sender ).transfer( amount );
+    }
   
     function _reflectFee(uint256 rFee, uint256 tFee) private {
         _rTotal = _rTotal.sub(rFee);
         _tFeeTotal = _tFeeTotal.add(tFee);
     }
-
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
         (uint256 tTransferAmount, uint256 tFee, uint256 tLiquidity) = _getTValues(tAmount);
@@ -1004,11 +1037,7 @@ contract Moonshot is Context, IERC20, Ownable {
         _taxFee = _previousTaxFee;
         _totalLiqFee = _prevTotalLiqFee;
     }
-    
-    function isExcludedFromFee(address account) public view returns(bool) {
-        return _isExcludedFromFee[account];
-    }
-
+ 
     function _approve(address owner, address spender, uint256 amount) private {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
@@ -1024,7 +1053,9 @@ contract Moonshot is Context, IERC20, Ownable {
     ) private {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
-        require(amount > 0, "Transfer amount must be greater than zero");
+        require(amount >= 0, "Transfer amount must be greater than zero");
+        require(!_isBlackListed[from], "From address is blacklisted");
+        require(!_isBlackListed[to], "To address is blacklisted");
         if(from != owner() && to != owner())
             require(amount <= _maxTxAmount, "Transfer amount exceeds the maxTxAmount.");
 
@@ -1074,7 +1105,7 @@ contract Moonshot is Context, IERC20, Ownable {
             uint256 otherHalf = forLiquidity.sub(half);
     
             uint256 initialBalance = address(this).balance;
-            swapTokensForEth(half);
+            swapTokensForBNB(half);
             uint256 newBalance = address(this).balance.sub(initialBalance);
             addLiquidity(otherHalf, newBalance);
             emit SwapAndLiquify(half, newBalance, otherHalf);
@@ -1083,18 +1114,18 @@ contract Moonshot is Context, IERC20, Ownable {
         if(forWallets > 0 && _marketingFee > 0)
         {
             uint256 initialBalance = address(this).balance;
-            swapTokensForEth(forWallets);
+            swapTokensForBNB(forWallets);
             uint256 newBalance = address(this).balance.sub(initialBalance);
     
-            uint256 feeAmount = newBalance.div(_marketingFee).mul(_marketingFee);
+            uint256 marketingShare = newBalance.div(_marketingFee).mul(_marketingFee);
             
-            if(feeAmount > 0)
-                transferToAddressETH(moonshotFundAddress, feeAmount);
+            if(marketingShare > 0)
+                transferToAddressETH(moonshotFundAddress, marketingShare);
 
         }
     }
 
-    function swapTokensForEth(uint256 tokenAmount) private {
+    function swapTokensForBNB(uint256 tokenAmount) private {
         // generate the uniswap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = address(this);
@@ -1140,8 +1171,6 @@ contract Moonshot is Context, IERC20, Ownable {
             _transferFromExcluded(sender, recipient, amount);
         } else if (!_isExcluded[sender] && _isExcluded[recipient]) {
             _transferToExcluded(sender, recipient, amount);
-        } else if (!_isExcluded[sender] && !_isExcluded[recipient]) {
-            _transferStandard(sender, recipient, amount);
         } else if (_isExcluded[sender] && _isExcluded[recipient]) {
             _transferBothExcluded(sender, recipient, amount);
         } else {
@@ -1191,5 +1220,8 @@ contract Moonshot is Context, IERC20, Ownable {
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
+
+     //to recieve ETH from uniswapV2Router when swaping
+    receive() external payable {}
 
 }
