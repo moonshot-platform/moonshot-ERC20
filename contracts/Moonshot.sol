@@ -7,7 +7,7 @@
 ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝  
 
  Moonshot is a deflationary defi meme token
- For every transaction, 4% goes to Holders and 6% goes to the Liqduity Pool
+ For every transaction, 4% goes to Holders, 5% goes to the Liqduity Pool and 1% goes to the project support fund
  As the burn address participates as a holder, the supply is forever decreasing
  This is a fork of SafeMoon
 */
@@ -696,6 +696,8 @@ contract Moonshot is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
+    address payable public moonshotFundAddress = payable(0x9d8a5d6B405c2Eb7cee724F4B2F67a902F0f0864);
+
     mapping (address => uint256) private _rOwned;
     mapping (address => uint256) private _tOwned;
     mapping (address => mapping (address => uint256)) private _allowances;
@@ -711,17 +713,20 @@ contract Moonshot is Context, IERC20, Ownable {
     uint256 private _tFeeTotal;
 
     string private _name = "Moonshot";
-    string private _symbol = "MOONSHOT";
+    string private _symbol = "MSHOT";
     uint8 private _decimals = 9;
     
     uint256 public _taxFee = 4;
     uint256 private _previousTaxFee = _taxFee;
     
-    uint256 public _liquidityFee = 6;
-    uint256 private _previousLiquidityFee = _liquidityFee;
+    uint256 public _totalLiqFee = 0;
+    uint256 private _prevTotalLiqFee = _totalLiqFee;
 
-    IUniswapV2Router02 public immutable uniswapV2Router;
-    address public immutable uniswapV2Pair;
+    uint256 public _liquidityFee = 5;
+    uint256 public _marketingFee = 1;
+
+    IUniswapV2Router02 public uniswapV2Router;
+    address public uniswapV2Pair;
     
     bool inSwapAndLiquify;
     bool public swapAndLiquifyEnabled = true;
@@ -747,10 +752,10 @@ contract Moonshot is Context, IERC20, Ownable {
         _rOwned[_msgSender()] = _rTotal;
         
         // BSC MainNet, Pancakeswap Router
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+        //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
         // Ropsten, Uniswap Router
-        //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
         // BSC TestNet
         //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
@@ -766,6 +771,9 @@ contract Moonshot is Context, IERC20, Ownable {
         _isExcludedFromFee[owner()] = true;
         _isExcludedFromFee[address(this)] = true;
         
+        _totalLiqFee = _liquidityFee.add(_marketingFee);
+        _prevTotalLiqFee = _totalLiqFee;
+
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
 
@@ -773,6 +781,19 @@ contract Moonshot is Context, IERC20, Ownable {
         IUniswapV2Router02 _newPancakeRouter = IUniswapV2Router02(newRouter);
         uniswapV2Pair = IUniswapV2Factory(_newPancakeRouter.factory()).createPair(address(this), _newPancakeRouter.WETH());
         uniswapV2Router = _newPancakeRouter;
+    }
+
+    function setmoonshotFundAddress(address newAddress) external onlyOwner() {
+        moonshotFundAddress = payable(newAddress);
+    }
+
+    function setTaxes(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newMarketingfee) external onlyOwner() {
+        _taxFee = newRewardFee;
+        _liquidityFee = newLiquidityFee;
+        _marketingFee = newMarketingfee;
+        
+        _totalLiqFee = _liquidityFee.add(_marketingFee);
+        _prevTotalLiqFee = _totalLiqFee;
     }
 
     function name() public view returns (string memory) {
@@ -889,14 +910,6 @@ contract Moonshot is Context, IERC20, Ownable {
     function includeInFee(address account) public onlyOwner {
         _isExcludedFromFee[account] = false;
     }
-    
-    function setTaxFeePercent(uint256 taxFee) external onlyOwner() {
-        _taxFee = taxFee;
-    }
-    
-    function setLiquidityFeePercent(uint256 liquidityFee) external onlyOwner() {
-        _liquidityFee = liquidityFee;
-    }
    
     function setMaxTxPercent(uint256 maxTxPercent) external onlyOwner() {
         _maxTxAmount = _tTotal.mul(maxTxPercent).div(
@@ -972,24 +985,24 @@ contract Moonshot is Context, IERC20, Ownable {
     }
 
     function calculateLiquidityFee(uint256 _amount) private view returns (uint256) {
-        return _amount.mul(_liquidityFee).div(
+        return _amount.mul(_totalLiqFee).div(
             10**2
         );
     }
 
     function removeAllFee() private {
-        if(_taxFee == 0 && _liquidityFee == 0) return;
+        if(_taxFee == 0 && _totalLiqFee == 0) return;
         
         _previousTaxFee = _taxFee;
-        _previousLiquidityFee = _liquidityFee;
+        _prevTotalLiqFee = _totalLiqFee;
         
         _taxFee = 0;
-        _liquidityFee = 0;
+        _totalLiqFee = 0;
     }
     
     function restoreAllFee() private {
         _taxFee = _previousTaxFee;
-        _liquidityFee = _previousLiquidityFee;
+        _totalLiqFee = _prevTotalLiqFee;
     }
     
     function isExcludedFromFee(address account) public view returns(bool) {
@@ -1050,27 +1063,35 @@ contract Moonshot is Context, IERC20, Ownable {
         _tokenTransfer(from,to,amount,takeFee);
     }
 
-    function swapAndLiquify(uint256 contractTokenBalance) private lockTheSwap {
-        // split the contract balance into halves
-        uint256 half = contractTokenBalance.div(2);
-        uint256 otherHalf = contractTokenBalance.sub(half);
-
-        // capture the contract's current ETH balance.
-        // this is so that we can capture exactly the amount of ETH that the
-        // swap creates, and not make the liquidity event include any ETH that
-        // has been manually sent to the contract
-        uint256 initialBalance = address(this).balance;
-
-        // swap tokens for ETH
-        swapTokensForEth(half); // <- this breaks the ETH -> HATE swap when swap+liquify is triggered
-
-        // how much ETH did we just swap into?
-        uint256 newBalance = address(this).balance.sub(initialBalance);
-
-        // add liquidity to uniswap
-        addLiquidity(otherHalf, newBalance);
+    function swapAndLiquify(uint256 tAmount) private lockTheSwap {
         
-        emit SwapAndLiquify(half, newBalance, otherHalf);
+        uint256 forLiquidity = tAmount.div(_totalLiqFee).mul(_liquidityFee);
+        uint256 forWallets = tAmount.sub(forLiquidity);
+        
+        if(forLiquidity > 0)
+        {
+            uint256 half = forLiquidity.div(2);
+            uint256 otherHalf = forLiquidity.sub(half);
+    
+            uint256 initialBalance = address(this).balance;
+            swapTokensForEth(half);
+            uint256 newBalance = address(this).balance.sub(initialBalance);
+            addLiquidity(otherHalf, newBalance);
+            emit SwapAndLiquify(half, newBalance, otherHalf);
+        }
+        
+        if(forWallets > 0 && _marketingFee > 0)
+        {
+            uint256 initialBalance = address(this).balance;
+            swapTokensForEth(forWallets);
+            uint256 newBalance = address(this).balance.sub(initialBalance);
+    
+            uint256 feeAmount = newBalance.div(_marketingFee).mul(_marketingFee);
+            
+            if(feeAmount > 0)
+                transferToAddressETH(moonshotFundAddress, feeAmount);
+
+        }
     }
 
     function swapTokensForEth(uint256 tokenAmount) private {
@@ -1089,6 +1110,10 @@ contract Moonshot is Context, IERC20, Ownable {
             address(this),
             block.timestamp
         );
+    }
+
+    function transferToAddressETH(address payable recipient, uint256 amount) private {
+        recipient.transfer(amount);
     }
 
     function addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
