@@ -1,5 +1,5 @@
 require('dotenv').config();
-const HDWalletProvider = require('truffle-hdwallet-provider');
+const HDWalletProvider = require("truffle-hdwallet-provider");
 
 
 module.exports = {
@@ -20,22 +20,18 @@ module.exports = {
       network_id: "2"
     },
     bsctestnet: {
-        provider: () => new HDWalletProvider( process.env.HDWALLET_MNEMONIC, 'https://data-seed-prebsc-1-s1.binance.org:8545' ),
+        provider: () => new HDWalletProvider( process.env.PRIVKEY, 'https://data-seed-prebsc-1-s1.binance.org:8545' ),
             network_id: 97,
             confirmations: 10,
             timeoutBlocks: 200,
             skipDryRun: true
     },
     ropsten: {
-        provider: function() {
-                return new HDWalletProvider(
-                process.env.HDWALLET_MNEMONIC,
-                process.env.ROPSTEN_URL,
-                0,
-                10)
-        },
-            network_id: "3",
-            gas: 8000000,
+        provider: () => new HDWalletProvider( process.env.PRIVKEY, process.env.ROPSTEN_URL ),
+            network_id: 3,
+            confirmation: 10,
+            timeoutBlocks: 200,
+            skipDryRun: true
     },
     bsc: {
         provider: () => new HDWalletProvider( process.env.HDWALLET_MNEMONIC, 'https://bsc-dataseed1.binance.org'),
