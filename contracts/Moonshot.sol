@@ -733,14 +733,8 @@ contract Moonshot is Context, IERC20, Ownable {
     uint256 public _maxTxAmount = 5000000 * 10**6 * 10**9;
     uint256 public numTokensSellToAddToLiquidity = 500000 * 10**6 * 10**9;
     
-    event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
     event SwapAndLiquifyEnabledUpdated(bool enabled);
-    event SwapAndLiquify(
-        uint256 tokensSwapped,
-        uint256 ethReceived,
-        uint256 tokensIntoLiquidity
-    );
-
+    event SwapAndLiquify(uint256 tokensSwapped, uint256 bnbReceived, uint256 tokensIntoLiquidity);
     event SetPancakeRouterAddress(address newRouter);
     event SetPancakePairAddress(address newPair);
     event SetMoonshotFundAddress(address newAddress);
