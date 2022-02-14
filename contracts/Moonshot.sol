@@ -1147,7 +1147,7 @@ contract Moonshot is Context, IERC20, Ownable {
     }
 
     function swapTokensForBNB(uint256 tokenAmount) private {
-        // generate the uniswap pair path of token -> weth
+        // generate the pancake pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = uniswapV2Router.WETH();
@@ -1157,7 +1157,7 @@ contract Moonshot is Context, IERC20, Ownable {
         // make the swap
         uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
             tokenAmount,
-            0, // accept any amount of ETH
+            0, // accept any amount of BNB
             path,
             address(this),
             block.timestamp
@@ -1168,12 +1168,12 @@ contract Moonshot is Context, IERC20, Ownable {
         recipient.transfer(amount);
     }
 
-    function addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
+    function addLiquidity(uint256 tokenAmount, uint256 bnbAmount) private {
         // approve token transfer to cover all possible scenarios
         _approve(address(this), address(uniswapV2Router), tokenAmount);
 
         // add the liquidity
-        uniswapV2Router.addLiquidityETH{value: ethAmount}(
+        uniswapV2Router.addLiquidityETH{value: bnbAmount}(
             address(this),
             tokenAmount,
             0, // slippage is unavoidable
