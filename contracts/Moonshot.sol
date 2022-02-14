@@ -1,4 +1,5 @@
 /*
+
 ███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗███████╗██╗  ██╗ ██████╗ ████████╗
 ████╗ ████║██╔═══██╗██╔═══██╗████╗  ██║██╔════╝██║  ██║██╔═══██╗╚══██╔══╝
 ██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║███████╗███████║██║   ██║   ██║   
@@ -6,10 +7,6 @@
 ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║███████║██║  ██║╚██████╔╝   ██║   
 ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝  
 
- Moonshot is a deflationary defi meme token
- For every transaction, 4% goes to Holders, 5% goes to the Liqduity Pool and 1% goes to the project support fund
- As the burn address participates as a holder, the supply is forever decreasing
- This is a fork of SafeMoon
 */
 
 pragma solidity ^0.6.12;
