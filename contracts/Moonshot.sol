@@ -741,9 +741,23 @@ contract Moonshot is Context, IERC20, Ownable {
     event SwapAndLiquify(
         uint256 tokensSwapped,
         uint256 ethReceived,
-        uint256 tokensIntoLiqudity
+        uint256 tokensIntoLiquidity
     );
-    
+
+    event SetPancakeRouterAddress(address newRouter);
+    event SetPancakePairAddress(address newPair);
+    event SetMoonshotFundAddress(address newAddress);
+    event SetFees(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newMarketingFee);
+    event ExcludeFromReward(address account);
+    event IncludeInReward(address account);
+    event ExcludeFromFee(address account);
+    event IncludeInFee(address account);
+    event SetMaxTxPercent(uint256 maxTxPercent);
+    event AddToBlackList(address account);
+    event RemoveFromBlackList(address account);
+    event SetNumTokensSellToAddToLiquidity(uint256 amount);
+    event RescueBNB(uint256 amount);
+
     modifier lockTheSwap {
         inSwapAndLiquify = true;
         _;
@@ -754,10 +768,10 @@ contract Moonshot is Context, IERC20, Ownable {
         _rOwned[_msgSender()] = _rTotal;
         
         // BSC MainNet, Pancakeswap Router
-        //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
         // Ropsten, Uniswap Router
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+        //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
         // BSC TestNet
         //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
@@ -781,14 +795,20 @@ contract Moonshot is Context, IERC20, Ownable {
 
     function setPancakeRouterAddress(address newRouter) external onlyOwner() {
         uniswapV2Router = IUniswapV2Router02(newRouter);
+
+        emit SetPancakeRouterAddress(newRouter);
     }
 
     function setPancakePairAddress(address newPair) external onlyOwner() {
         uniswapV2Pair = newPair;
+
+        emit SetPancakePairAddress(newPair);
     }
 
     function setMoonshotFundAddress(address newAddress) external onlyOwner() {
         moonshotFundAddress = payable(newAddress);
+
+        emit SetMoonshotFundAddress(newAddress);
     }
 
    function setFees(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newMarketingFee) external onlyOwner() {
@@ -802,6 +822,7 @@ contract Moonshot is Context, IERC20, Ownable {
         _totalLiqFee = _liquidityFee.add(_marketingFee);
         _prevTotalLiqFee = _totalLiqFee;
 
+        emit SetFees(newRewardFee, newLiquidityFee, newMarketingFee);
     }
 
     function name() public pure returns (string memory) {
@@ -863,15 +884,6 @@ contract Moonshot is Context, IERC20, Ownable {
         return _tFeeTotal;
     }
 
-    function deliver(uint256 tAmount) public {
-        address sender = _msgSender();
-        require(!_isExcluded[sender], "Excluded addresses cannot call this function");
-        (uint256 rAmount,,,,,) = _getValues(tAmount);
-        _rOwned[sender] = _rOwned[sender].sub(rAmount);
-        _rTotal = _rTotal.sub(rAmount);
-        _tFeeTotal = _tFeeTotal.add(tAmount);
-    }
-
     function reflectionFromToken(uint256 tAmount, bool deductTransferFee) external view returns(uint256) {
         require(tAmount <= _tTotal, "Amount must be less than supply");
         if (!deductTransferFee) {
@@ -897,6 +909,8 @@ contract Moonshot is Context, IERC20, Ownable {
         }
         _isExcluded[account] = true;
         _excluded.push(account);
+
+        emit ExcludeFromReward(account);
     }
 
     function includeInReward(address account) external onlyOwner() {
@@ -912,14 +926,20 @@ contract Moonshot is Context, IERC20, Ownable {
                 break;
             }
         }
+
+        emit IncludeInReward(account);
     }
     
     function excludeFromFee(address account) external onlyOwner {
         _isExcludedFromFee[account] = true;
+
+        emit ExcludeFromFee(account);
     }
     
     function includeInFee(address account) external onlyOwner {
         _isExcludedFromFee[account] = false;
+
+        emit IncludeInFee(account);
     }
    
     function setMaxTxPercent(uint256 maxTxPercent) external onlyOwner() {
@@ -928,6 +948,8 @@ contract Moonshot is Context, IERC20, Ownable {
         _maxTxAmount = _tTotal.mul(maxTxPercent).div(
             10**2
         );
+
+        emit SetMaxTxPercent(maxTxPercent);
     }
 
     function setSwapAndLiquifyEnabled(bool _enabled) external onlyOwner {
@@ -937,10 +959,14 @@ contract Moonshot is Context, IERC20, Ownable {
     
     function addToBlackList(address account) external onlyOwner {
         _isBlackListed[ account ] = true;
+
+        emit AddToBlackList(account);
     }
 
-    function delFromBlackList(address account) external onlyOwner {
+    function removeFromBlackList(address account) external onlyOwner {
         _isBlackListed[ account ] = false;
+
+        emit RemoveFromBlackList(account);
     }
 
     function isBlackListed(address account) external view returns(bool) {
@@ -953,11 +979,15 @@ contract Moonshot is Context, IERC20, Ownable {
     
     function setNumTokensSellToAddToLiquidity(uint256 amount) external onlyOwner {
         numTokensSellToAddToLiquidity = amount;
+
+        emit SetNumTokensSellToAddToLiquidity(amount);
     }
 
     // contract gains non-withdrawable BNB from swapAndLiquify function
     function rescueBNB(uint256 amount) external onlyOwner {
         payable( msg.sender ).transfer( amount );
+
+        emit RescueBNB(amount);
     }
   
     function _reflectFee(uint256 rFee, uint256 tFee) private {
@@ -1221,7 +1251,7 @@ contract Moonshot is Context, IERC20, Ownable {
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
-     //to recieve ETH from uniswapV2Router when swaping
+     //to receive BNB from pancakeV2Router when swapping
     receive() external payable {}
 
 }
