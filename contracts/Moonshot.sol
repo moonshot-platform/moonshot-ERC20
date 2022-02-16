@@ -724,6 +724,7 @@ contract Moonshot is Context, IERC20, Ownable {
 
     uint256 public _liquidityFee = 5;
     uint256 public _marketingFee = 1;
+    bool public paused = false;
 
     IUniswapV2Router02 public uniswapV2Router;
     address public uniswapV2Pair;
@@ -748,6 +749,8 @@ contract Moonshot is Context, IERC20, Ownable {
     event SetNumTokensSellToAddToLiquidity(uint256 amount);
     event RescueBNB(uint256 amount);
     event RescueToken(address tokenAddress, uint256 amount);
+    event Pause();
+    event UnPause();
 
     modifier lockTheSwap {
         inSwapAndLiquify = true;
@@ -812,7 +815,6 @@ contract Moonshot is Context, IERC20, Ownable {
     }
 
    function setFees(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newMarketingFee) external onlyOwner() {
-        
         require( (newRewardFee + newLiquidityFee + newMarketingFee) <= 10, "Total fees must be <= 10" );
         
         _taxFee = newRewardFee;
@@ -874,6 +876,10 @@ contract Moonshot is Context, IERC20, Ownable {
     function decreaseAllowance(address spender, uint256 subtractedValue) external virtual returns (bool) {
         _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
         return true;
+    }
+
+    function getCirculatingSupply() public view returns (uint256) {
+        return _tTotal.sub(balanceOf( _deadAddress ));
     }
 
     function isExcludedFromReward(address account) external view returns (bool) {
@@ -973,10 +979,6 @@ contract Moonshot is Context, IERC20, Ownable {
         emit SetNumTokensSellToAddToLiquidity(amount);
     }
 
-    function getCirculatingSupply() public view returns (uint256) {
-        return _tTotal.sub(balanceOf( _deadAddress ));
-    }
-
     // contract gains non-withdrawable BNB from swapAndLiquify function
     function rescueBNB(uint256 amount) external onlyOwner {
         payable( msg.sender ).transfer(amount);
@@ -989,6 +991,19 @@ contract Moonshot is Context, IERC20, Ownable {
         IERC20(tokenAddress).transfer( msg.sender , amount);
 
         emit RescueToken(tokenAddress, amount);
+    }
+
+    // owner has the ability to pause transfer of tokens until unpaused
+    function pause() external onlyOwner {
+        require( !paused, "Already paused");
+        paused = true;
+        emit Pause();
+    }
+
+    function unpause() external onlyOwner {
+        require( paused, "Already unpaused");
+        paused = false;
+        emit UnPause();        
     }
 
     function _reflectFee(uint256 rFee, uint256 tFee) private {
@@ -1087,7 +1102,8 @@ contract Moonshot is Context, IERC20, Ownable {
         require(amount >= 0, "Transfer amount must be greater than zero");
         require(!_isBlackListed[from], "From address is blacklisted");
         require(!_isBlackListed[to], "To address is blacklisted");
-       
+        require(!paused, "Paused");
+
         // is the token balance of this contract address over the min number of
         // tokens that we need to initiate a swap + liquidity lock?
         // also, don't get caught in a circular liquidity event.
@@ -1244,6 +1260,7 @@ contract Moonshot is Context, IERC20, Ownable {
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
+
 
      //to receive BNB from pancakeV2Router when swapping
     receive() external payable {}
