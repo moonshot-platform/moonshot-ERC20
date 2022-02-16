@@ -1102,10 +1102,11 @@ contract Moonshot is Context, IERC20, Ownable {
     ) private {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
-        require(amount >= 0, "Transfer amount must be greater than zero");
+        require(amount > 0, "Transfer amount must be greater than zero");
         require(!_isBlackListed[from], "From address is blacklisted");
         require(!_isBlackListed[to], "To address is blacklisted");
-        require(!paused, "Paused");
+        if(from != owner() && to != owner())
+            require(!paused, "Paused");
 
         // is the token balance of this contract address over the min number of
         // tokens that we need to initiate a swap + liquidity lock?
