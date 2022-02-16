@@ -695,6 +695,7 @@ contract Moonshot is Context, IERC20, Ownable {
     using Address for address;
 
     address payable public moonshotFundAddress = payable(0x9d8a5d6B405c2Eb7cee724F4B2F67a902F0f0864);
+    address public immutable _deadAddress = 0x000000000000000000000000000000000000dEaD;
 
     mapping (address => uint256) private _rOwned;
     mapping (address => uint256) private _tOwned;
@@ -730,7 +731,6 @@ contract Moonshot is Context, IERC20, Ownable {
     bool private inSwapAndLiquify;
     bool public swapAndLiquifyEnabled = true;
     
-    uint256 public _maxTxAmount = 5000000 * 10**6 * 10**9;
     uint256 public numTokensSellToAddToLiquidity = 500000 * 10**6 * 10**9;
     
     event SwapAndLiquifyEnabledUpdated(bool enabled);
@@ -743,11 +743,11 @@ contract Moonshot is Context, IERC20, Ownable {
     event IncludeInReward(address account);
     event ExcludeFromFee(address account);
     event IncludeInFee(address account);
-    event SetMaxTxPercent(uint256 maxTxPercent);
     event AddToBlackList(address account);
     event RemoveFromBlackList(address account);
     event SetNumTokensSellToAddToLiquidity(uint256 amount);
     event RescueBNB(uint256 amount);
+    event RescueToken(address tokenAddress, uint256 amount);
 
     modifier lockTheSwap {
         inSwapAndLiquify = true;
@@ -786,6 +786,15 @@ contract Moonshot is Context, IERC20, Ownable {
 
     function setPancakeRouterAddress(address newRouter) external onlyOwner() {
         uniswapV2Router = IUniswapV2Router02(newRouter);
+
+        // test if pair exists and create if it does not exist
+        address pair = IUniswapV2Factory(uniswapV2Router.factory()).getPair(address(this), uniswapV2Router.WETH());
+        if (pair == address(0)) {
+            uniswapV2Pair = IUniswapV2Factory(uniswapV2Router.factory()).createPair(address(this), uniswapV2Router.WETH());
+        }
+        else {
+            uniswapV2Pair = pair;
+        }
 
         emit SetPancakeRouterAddress(newRouter);
     }
@@ -932,16 +941,6 @@ contract Moonshot is Context, IERC20, Ownable {
 
         emit IncludeInFee(account);
     }
-   
-    function setMaxTxPercent(uint256 maxTxPercent) external onlyOwner() {
-        require( maxTxPercent > 0 && maxTxPercent <= 100 , "maxTxPercent must be > 0 and <= 100");
-        
-        _maxTxAmount = _tTotal.mul(maxTxPercent).div(
-            10**2
-        );
-
-        emit SetMaxTxPercent(maxTxPercent);
-    }
 
     function setSwapAndLiquifyEnabled(bool _enabled) external onlyOwner {
         swapAndLiquifyEnabled = _enabled;
@@ -974,13 +973,24 @@ contract Moonshot is Context, IERC20, Ownable {
         emit SetNumTokensSellToAddToLiquidity(amount);
     }
 
+    function getCirculatingSupply() public view returns (uint256) {
+        return _tTotal.sub(balanceOf( _deadAddress ));
+    }
+
     // contract gains non-withdrawable BNB from swapAndLiquify function
     function rescueBNB(uint256 amount) external onlyOwner {
-        payable( msg.sender ).transfer( amount );
+        payable( msg.sender ).transfer(amount);
 
         emit RescueBNB(amount);
     }
   
+    // sometimes, tokens are sent to the contract by mistake
+    function rescueToken(address tokenAddress, uint256 amount) external onlyOwner {
+        IERC20(tokenAddress).transfer( msg.sender , amount);
+
+        emit RescueToken(tokenAddress, amount);
+    }
+
     function _reflectFee(uint256 rFee, uint256 tFee) private {
         _rTotal = _rTotal.sub(rFee);
         _tFeeTotal = _tFeeTotal.add(tFee);
@@ -1077,19 +1087,12 @@ contract Moonshot is Context, IERC20, Ownable {
         require(amount >= 0, "Transfer amount must be greater than zero");
         require(!_isBlackListed[from], "From address is blacklisted");
         require(!_isBlackListed[to], "To address is blacklisted");
-        if(from != owner() && to != owner())
-            require(amount <= _maxTxAmount, "Transfer amount exceeds the maxTxAmount.");
-
+       
         // is the token balance of this contract address over the min number of
         // tokens that we need to initiate a swap + liquidity lock?
         // also, don't get caught in a circular liquidity event.
         // also, don't swap & liquify if sender is uniswap pair.
         uint256 contractTokenBalance = balanceOf(address(this));
-        
-        if(contractTokenBalance >= _maxTxAmount)
-        {
-            contractTokenBalance = _maxTxAmount;
-        }
         
         bool overMinTokenBalance = contractTokenBalance >= numTokensSellToAddToLiquidity;
         if (
