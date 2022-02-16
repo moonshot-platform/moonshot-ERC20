@@ -694,8 +694,9 @@ contract Moonshot is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
-    address payable public moonshotFundAddress = payable(0x9d8a5d6B405c2Eb7cee724F4B2F67a902F0f0864);
+    
     address public immutable _deadAddress = 0x000000000000000000000000000000000000dEaD;
+    address payable public moonshotFundAddress = payable(0x000000000000000000000000000000000000dEaD);
 
     mapping (address => uint256) private _rOwned;
     mapping (address => uint256) private _tOwned;
