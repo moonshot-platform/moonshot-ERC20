@@ -780,6 +780,9 @@ contract Moonshot is Context, IERC20, Ownable {
         //exclude owner and this contract from fee
         _isExcludedFromFee[owner()] = true;
         _isExcludedFromFee[address(this)] = true;
+
+        //exclude pair address
+        _isExcludedFromFee[uniswapV2Pair] = true;
         
         _totalLiqFee = _liquidityFee.add(_marketingFee);
         _prevTotalLiqFee = _totalLiqFee;
