@@ -8,6 +8,8 @@ module.exports = async function(callback) {
 
       console.log("Moonshot at ", m.address);
       
+      // airdrop done, continue
+
       // set moonshot fund address
       await m.setMoonshotFundAddress(0x9d8a5d6B405c2Eb7cee724F4B2F67a902F0f0864);
 
