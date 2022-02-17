@@ -177,8 +177,7 @@ contract DropMoonshot is Context, MiniOwnable {
     mapping( address => bool) private _isBlackListed;
 
     uint256 public _totalClaimed = 0;
-    uint256 public _minAmount = 0;
- 
+    
     event SetFromTokenAddress(address newTokenContract);
     event SetToTokenAddress(address newTokenContract);
     event Claimed(address account, uint256 amount);
