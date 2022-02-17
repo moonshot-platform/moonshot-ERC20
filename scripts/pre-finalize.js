@@ -1,9 +1,15 @@
 const Moonshot = artifacts.require( "Moonshot" );
+const DropMoonshot = artifacts.require( "DropMoonshot" );
 
 module.exports = async function(callback) {
   try {
         
       const m = await Moonshot.deployed();
+      const a = await DropMoonshot.deployed();
+
+      console.log("Moonshot at ", m.address);
+      console.log("DropMoonshot at ", a.address);
+
 
       // prepare airdrop 
       await m.setSwapAndLiquifyEnabled( false );
@@ -11,8 +17,19 @@ module.exports = async function(callback) {
 
       // halt trading except for owner
       await m.pause();
-      
-      // run airdrop is not here
+    
+      // whitelist airdrop contract
+      await m.excludeFromReward( a.address );
+      await m.excludeFromFee( a.address );
+
+      // set To
+      await a.setToTokenAddress( m.address );
+
+      // set From
+      MainNet: await a.setFromTokenAddress( "0xd27d3f7f329d93d897612e413f207a4dbe8bf799" );
+      //TestNet: await a.setFromTokenAddress( "0x4032bA66D4820229ce73cB026DFDD0E6F40822A8");
+
+
   }
   catch( error ) {
       console.log(error);
