@@ -7,6 +7,13 @@
 ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║███████║██║  ██║╚██████╔╝   ██║   
 ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝  
 
+Moonshot is a deflationary, frictionless yield and liquidity protocol.
+
+For every transaction, a fee of max. 10% is decucted and shared between holders, the liqduity pool and the dev/marketing wallet.
+As the burn address participates as a holder, the supply is forever decreasing.
+
+Started out at DEFI meme token, moonshot features MoonBoxes and MoonSea.
+
 */
 
 pragma solidity ^0.6.12;
