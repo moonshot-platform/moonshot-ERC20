@@ -700,9 +700,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
 contract Moonshot is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
-
-    
-    address public immutable _deadAddress = 0x000000000000000000000000000000000000dEaD;
+  
     address payable public moonshotFundAddress = payable(0x000000000000000000000000000000000000dEaD);
 
     mapping (address => uint256) private _rOwned;
@@ -890,7 +888,7 @@ contract Moonshot is Context, IERC20, Ownable {
     }
 
     function getCirculatingSupply() public view returns (uint256) {
-        return _tTotal.sub(balanceOf( _deadAddress ));
+        return _tTotal.sub(balanceOf( 0x000000000000000000000000000000000000dEaD ));
     }
 
     function isExcludedFromReward(address account) external view returns (bool) {
@@ -1006,13 +1004,11 @@ contract Moonshot is Context, IERC20, Ownable {
 
     // owner has the ability to pause transfer of tokens until unpaused
     function pause() external onlyOwner {
-        require( !paused, "Already paused");
         paused = true;
         emit Pause();
     }
 
     function unpause() external onlyOwner {
-        require( paused, "Already unpaused");
         paused = false;
         emit UnPause();        
     }
