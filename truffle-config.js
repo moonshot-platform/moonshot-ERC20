@@ -22,8 +22,9 @@ module.exports = {
     bsctestnet: {
         provider: () => new HDWalletProvider( process.env.PRIVKEY, 'https://data-seed-prebsc-1-s1.binance.org:8545' ),
             network_id: 97,
-            confirmations: 10,
+            confirmations: 2,
             timeoutBlocks: 200,
+            gas: 10000000,
             skipDryRun: true
     },
     ropsten: {
@@ -36,8 +37,9 @@ module.exports = {
     bsc: {
         provider: () => new HDWalletProvider( process.env.PRIVKEY, 'https://bsc-dataseed1.binance.org'),
             network_id: 56,
-            confirmations: 10,
+            confirmations: 2,
             timeoutBlocks: 200,
+            gas: 20000000,
             skipDryRun: true
     }
   },
@@ -55,7 +57,7 @@ module.exports = {
       settings: {
         optimizer: {
           enabled: true,
-          runs: 200
+          runs: 1000
         }
       }
     }
