@@ -199,6 +199,17 @@ contract DropMoonshot is Context, MiniOwnable {
         emit SetToTokenAddress(toContract);
     }
 
+    function hasClaimed() external view returns (bool) {
+        return _claimed[ msg.sender ];
+    }
+
+    function canClaim() external view returns (uint256) {
+        if( _claimed[msg.sender] ) {
+            return 0;
+        }
+        return IERC20(fromContract).balanceOf(msg.sender);
+    }
+
     function claim() external {
 
         require( !_claimed[ msg.sender ], "Already claimed" );
