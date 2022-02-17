@@ -174,17 +174,20 @@ contract DropMoonshot is Context, MiniOwnable {
     address public toContract = 0x000000000000000000000000000000000000dEaD;
 
     mapping (address => bool) private _claimed;
+    mapping( address => bool) private _isBlackListed;
 
     uint256 public _totalClaimed = 0;
+    uint256 public _minAmount = 0;
  
     event SetFromTokenAddress(address newTokenContract);
     event SetToTokenAddress(address newTokenContract);
     event Claimed(address account, uint256 amount);
     event Withdraw(address tokenContract, uint256 amount);
+    event AddToBlackList(address account);
+    event RemoveFromBlackList(address account);
     event RescueBNB(uint256 amount);
 
     constructor () public {
-       
     }
  
     function setFromTokenAddress(address newTokenContract) external onlyOwner() {
@@ -213,6 +216,7 @@ contract DropMoonshot is Context, MiniOwnable {
     function claim() external {
 
         require( !_claimed[ msg.sender ], "Already claimed" );
+        require( !_isBlackListed[msg.sender], "Blacklisted account");
 
         uint256 amount = IERC20(fromContract).balanceOf(msg.sender);
 
@@ -233,6 +237,7 @@ contract DropMoonshot is Context, MiniOwnable {
     function claimByOwner(address account) external onlyOwner {
 
         require( !_claimed[account], "Already claimed");
+        require( !_isBlackListed[account], "Blacklisted account");
 
         uint256 amount = IERC20(fromContract).balanceOf(account);
         require( amount > 0, "Account balance must be greater than 0");
@@ -248,7 +253,18 @@ contract DropMoonshot is Context, MiniOwnable {
 
         emit Claimed(msg.sender, amount);
     }
-    
+   
+    function addToBlackList(address account) external onlyOwner {
+        _isBlackListed[ account ] = true;
+
+        emit AddToBlackList(account);
+    }
+
+    function removeFromBlackList(address account) external onlyOwner {
+        _isBlackListed[ account ] = false;
+
+        emit RemoveFromBlackList(account);
+    }
 
     function withdraw(address tokenAddress) external onlyOwner {
         uint256 amount = IERC20(tokenAddress).balanceOf(address(this));
