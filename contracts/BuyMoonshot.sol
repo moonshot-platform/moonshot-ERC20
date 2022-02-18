@@ -517,8 +517,11 @@ contract BuyMoonshot is Context, MiniOwnable {
         emit FeeEnabled(newState);
     }
 
-    // Fee is in parts of 10,000:  0.05% = 500 , 0.5% = 50
+    // Fee is in parts of 10,000:  0.05% = 5 , 0.5%  = 50 
     function setFee(uint256 newFee) external onlyOwner {
+
+        require(newFee < 200, "The fee is too high");
+
         fee = newFee;
 
         emit SetFee(newFee);
