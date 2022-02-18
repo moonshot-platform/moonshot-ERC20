@@ -32,7 +32,7 @@ Notes:
 ### BuyMoonshot.sol
 
 Contract that sends MoonshotV2 to the caller upon receiving BNB.
-A 0.5% fee is deducted from the BNB received to do a market buy of the Moonshot V2 token using the pancakeswap V2 Router
+A 0.5% fee is deducted from the BNB received before doing a market buy of the Moonshot V2 token using the pancakeswap V2 Router
 
 Notes:
 - The contract contains a function to enable or disable the fee
