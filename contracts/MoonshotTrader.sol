@@ -306,9 +306,7 @@ contract MoonshotTrader is Context, MiniOwnable {
     event Withdraw(address tokenContract, uint256 amount);
     event RescueBNB(uint256 amount);
     event BuyTokens(address account, uint256 amount);
-    event RouterAddressChanged(address newRouterAddress);
-
-    uint constant MAX_UINT = 2**256 - 1;
+    event SetRouterAddress(address newRouterAddress);
 
     constructor() public payable {
         uniswapV2Router = IUniswapV2Router02(routerAddress);
@@ -324,7 +322,7 @@ contract MoonshotTrader is Context, MiniOwnable {
         routerAddress = newRouterAddress;
         uniswapV2Router = IUniswapV2Router02(routerAddress);
 
-        emit RouterAddressChanged(routerAddress);
+        emit SetRouterAddress(routerAddress);
     }
 
     // this function swaps BNB for the configured token (market buy)
