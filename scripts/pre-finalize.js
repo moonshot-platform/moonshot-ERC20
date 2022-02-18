@@ -28,7 +28,7 @@ module.exports = async function(callback) {
 
       // set to token contract address in claim contract
       await a.setToTokenAddress( m.address );
-q
+
       // add bitmart hacker to blacklist of claim contract
       await a.addToBlackList( "0x25fb126B6c6B5c8EF732b86822fA0F0024E16C61" );
 
