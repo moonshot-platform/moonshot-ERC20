@@ -1,16 +1,16 @@
 const Moonshot = artifacts.require( "Moonshot" );
-const DropMoonshot = artifacts.require( "DropMoonshot" );
-const MoonshotTrader = artifacts.require( "MoonshotTrader" );
+const ClaimMoonshot = artifacts.require( "ClaimMoonshot" );
+const BuyMoonshot = artifacts.require( "BuyMoonshot" );
 
 module.exports = async function(callback) {
   try {
         
       const m = await Moonshot.deployed();
-      const a = await DropMoonshot.deployed();
-      const t = await MoonshotTrader.deployed();
+      const a = await ClaimMoonshot.deployed();
+      const t = await BuyMoonshot.deployed();
 
       console.log("Moonshot at ", m.address);
-      console.log("DropMoonshot at ", a.address);
+      console.log("ClaimMoonshot at ", a.address);
       console.log("Buy contract at ", t.address);
 
       // set moonshot fund address and exclude from fee
@@ -37,8 +37,12 @@ module.exports = async function(callback) {
      
       // set token address in buy contract
       await t.setTokenAddress( m.address );
+      // set fee enabled in buy contract (0.5%)
+      await t.setFeeEnabled( true );
 
-      console.log("Add Liquidity and Burn");
+
+
+      console.log("Add Liquidity, Burn and Fund Claim contract");
   }
   catch( error ) {
       console.log(error);

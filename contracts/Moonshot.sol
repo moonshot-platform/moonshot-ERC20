@@ -718,8 +718,8 @@ contract Moonshot is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private constant _name = "MoonDust";
-    string private constant _symbol = "MDUST";
+    string private constant _name = "Moonshot";
+    string private constant _symbol = "MSHOT";
     uint8 private constant _decimals = 9;
     
     uint256 public _taxFee = 4;

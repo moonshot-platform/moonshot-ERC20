@@ -168,7 +168,7 @@ contract MiniOwnable is Context {
 }
 
 
-contract DropMoonshot is Context, MiniOwnable {
+contract ClaimMoonshot is Context, MiniOwnable {
     
     address public fromContract = 0x000000000000000000000000000000000000dEaD;
     address public toContract = 0x000000000000000000000000000000000000dEaD;
@@ -271,10 +271,12 @@ contract DropMoonshot is Context, MiniOwnable {
         emit Withdraw(tokenAddress, amount);
     }
 
-    function rescueBNB(uint256 amount) external onlyOwner {
-        payable( msg.sender ).transfer(amount);
+    function rescueBNB() external onlyOwner {
+        uint256 balance = address(this).balance;
+
+        payable( msg.sender ).transfer( balance );
         
-        emit RescueBNB(amount);
+        emit RescueBNB(balance);
     }
   
     receive() external payable {}

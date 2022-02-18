@@ -1,8 +1,8 @@
 require( 'dotenv' ).config();
 
 const token = artifacts.require("Moonshot");
-const claim = artifacts.require("DropMoonshot");
-const buy = artifacts.require("MoonshotTrader");
+const claim = artifacts.require("ClaimMoonshot");
+const buy = artifacts.require("BuyMoonshot");
 
 const migration = async function( deployer, network, accounts ) {
         await Promise.all([
