@@ -13,6 +13,7 @@ The contract takes a 10% fee:
  - 4% is added to the V2 LP pool
  - 2% is added to the Moonshot support fund
 
+Notes:
 - The contract contains functions for the owner to blacklist addresses and to pause the transfer() function
 - Tokens sent to the contract can be rescued
 - There is no max TX amount and the total fees can be set to at most 10%
@@ -22,6 +23,7 @@ The contract takes a 10% fee:
 
 Contract that sends MoonshotV2 to the caller if the caller has a positive Moonshot balance. The caller can only claim once.
 
+Notes:
 - The contract contains functions for the owner to black list addresses
 - The contract contains a function for the owner to burn the token's MoonshotV2 balance 
 - The contract contains a function to rescue BNB
@@ -32,6 +34,7 @@ Contract that sends MoonshotV2 to the caller if the caller has a positive Moonsh
 Contract that sends MoonshotV2 to the caller upon receiving BNB.
 A 0.5% fee is deducted from the BNB received to do a market buy of the Moonshot V2 token using the pancakeswap V2 Router
 
+Notes:
 - The contract contains a function to enable or disable the fee
 - The contract contains a function to set the fee to at most 2%
 - The contract contains functions to update token contract addresses
