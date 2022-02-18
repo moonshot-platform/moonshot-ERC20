@@ -1,14 +1,43 @@
 # Project Moonshot
 
-Deflationary, Frictionless yield and liquidity generation protocol. 
-Simply hold Moonshot in your wallet and gain rewards when others transfer.
-
 Feel free to read the code.
 
-## Contract Address
+## Overview of Contracts 
 
-The contract address is 0xd27d3f7f329d93d897612e413f207a4dbe8bf799 and deployed on Binance Smart Chain: https://bscscan.com/address/0xd27d3f7f329d93d897612e413f207a4dbe8bf799#code
+1. Moonshot.sol BEP20 token
 
+Deflationary, Frictionless yield and liquidity generation protocol. 
+Simply hold Moonshot in your wallet and gain rewards when others transfer.
+The contract takes a 10% fee:
+ - 4% is redistributed to all holders
+ - 4% is added to the V2 LP pool
+ - 2% is added to the Moonshot support fund
+
+The contract contains functions for the owner to blacklist addresses and to pause the transfer() function
+Tokens sent to the contract can be rescued
+There is no max TX amount and the total fees can be set to at most 10%
+The router can be upgraded
+
+2. ClaimMoonshot.sol
+
+Contract that sends MoonshotV2 to the caller if the caller has a positive Moonshot balance.
+The caller can only claim once.
+
+The contract contains functions for the owner to black list addresses
+The contract contains a function for the owner to burn the token's MoonshotV2 balance 
+The contract contains a function to rescue BNB
+The contract contains no functions to withdraw the balance of a BEP20 token
+
+3. BuyMoonshot.sol
+
+Contract that sends MoonshotV2 to the caller upon receiving BNB.
+A 0.5% fee is deducted from the BNB received to do a market buy of the Moonshot V2 token using the pancakeswap V2 Router
+
+The contract contains a function to enable or disable the fee
+The contract contains a function to set the fee to at most 2%
+The contract contains functions to update token contract addresses
+The contract contains a function to withdraw BNB
+The contract contains a function to withdrawp BEP20 tokens
 
 ## Setting up your workspace
 
@@ -38,7 +67,10 @@ For development:
 
 ## Running scripts
 
-0. Run 'npx truffle exec scripts/script.js --network bsctestnet'
+To configure the contract instances for use, you can run the files in scripts/ 
+
+0. Run 'npx truffle exec scripts/pre-finalize.js --network bsctestnet'
+
 
 
 ## License
