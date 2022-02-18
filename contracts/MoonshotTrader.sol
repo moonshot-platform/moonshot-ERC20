@@ -327,7 +327,6 @@ contract MoonshotTrader is Context, MiniOwnable {
 
     // this function swaps BNB for the configured token (market buy)
     function buyTokenWithBNB() public payable {
-        
         uint256 amount = msg.value;
         address beneficiary = msg.sender;
         
