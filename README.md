@@ -39,7 +39,7 @@ Notes:
 - The contract contains a function to set the fee to at most 2%
 - The contract contains functions to update token contract addresses
 - The contract contains a function to withdraw BNB
-- The contract contains a function to withdrawp BEP20 tokens
+- The contract contains a function to withdraw BEP20 tokens
 
 ## Setting up your workspace
 
