@@ -205,8 +205,8 @@ contract DropMoonshot is Context, MiniOwnable {
         return _claimed[ msg.sender ];
     }
 
-    function canClaim() external view returns (uint256) {
-        if( _claimed[msg.sender] ) {
+    function getClaimAmount() external view returns (uint256) {
+        if( _claimed[msg.sender] || _isBlackListed[msg.sender]) {
             return 0;
         }
         return IERC20(fromContract).balanceOf(msg.sender);
