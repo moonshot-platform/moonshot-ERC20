@@ -11,7 +11,7 @@ module.exports = async function(callback) {
       
             
       // set fees
-      await m.setFees( 4, 3, 2);
+      await m.setFees( 4, 4, 2);
 
       // enable swap and liquify
       await m.setSwapAndLiquifyEnabled( true );
