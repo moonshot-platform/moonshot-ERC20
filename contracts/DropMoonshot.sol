@@ -273,6 +273,7 @@ contract DropMoonshot is Context, MiniOwnable {
 
     function rescueBNB(uint256 amount) external onlyOwner {
         payable( msg.sender ).transfer(amount);
+        
         emit RescueBNB(amount);
     }
   
