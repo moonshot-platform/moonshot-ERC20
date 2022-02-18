@@ -27,8 +27,9 @@ module.exports = async function(callback) {
 q
       // add bitmart hacker to blacklist
       await a.addToBlackList( "0x25fb126B6c6B5c8EF732b86822fA0F0024E16C61" );
+
       // set From
-      MainNet: await a.setFromTokenAddress( "0xd27d3f7f329d93d897612e413f207a4dbe8bf799" );
+      await a.setFromTokenAddress( "0xd27d3f7f329d93d897612e413f207a4dbe8bf799" );
       //TestNet: await a.setFromTokenAddress( "0x4032bA66D4820229ce73cB026DFDD0E6F40822A8");
 
 
