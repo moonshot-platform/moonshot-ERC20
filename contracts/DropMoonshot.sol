@@ -218,14 +218,13 @@ contract DropMoonshot is Context, MiniOwnable {
         require( !_isBlackListed[msg.sender], "Blacklisted account");
 
         uint256 amount = IERC20(fromContract).balanceOf(msg.sender);
-
         require( amount > 0, "Your balance must be greater than 0");
 
         uint256 contractAmount = IERC20(toContract).balanceOf( address(this) );
         require( contractAmount > 0 , "Out of tokens");
         require( amount <= contractAmount, "Not enough tokens");
 
-        IERC20(toContract).transfer( msg.sender , amount);
+        IERC20(toContract).transfer( msg.sender, amount);
 
         _claimed[ msg.sender ] = true;
         _totalClaimed += amount;
