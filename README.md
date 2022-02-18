@@ -4,7 +4,7 @@ Feel free to read the code.
 
 ## Overview of Contracts 
 
-1. Moonshot.sol BEP20 token
+### Moonshot.sol BEP20 token
 
 Deflationary, Frictionless yield and liquidity generation protocol. 
 Simply hold Moonshot in your wallet and gain rewards when others transfer.
@@ -18,7 +18,7 @@ Tokens sent to the contract can be rescued
 There is no max TX amount and the total fees can be set to at most 10%
 The router can be upgraded
 
-2. ClaimMoonshot.sol
+### ClaimMoonshot.sol
 
 Contract that sends MoonshotV2 to the caller if the caller has a positive Moonshot balance.
 The caller can only claim once.
@@ -28,7 +28,7 @@ The contract contains a function for the owner to burn the token's MoonshotV2 ba
 The contract contains a function to rescue BNB
 The contract contains no functions to withdraw the balance of a BEP20 token
 
-3. BuyMoonshot.sol
+### BuyMoonshot.sol
 
 Contract that sends MoonshotV2 to the caller upon receiving BNB.
 A 0.5% fee is deducted from the BNB received to do a market buy of the Moonshot V2 token using the pancakeswap V2 Router
