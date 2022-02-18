@@ -1,14 +1,17 @@
 const Moonshot = artifacts.require( "Moonshot" );
 const DropMoonshot = artifacts.require( "DropMoonshot" );
+const MoonshotTrader = artifacts.require( "MoonshotTrader" );
 
 module.exports = async function(callback) {
   try {
         
       const m = await Moonshot.deployed();
       const a = await DropMoonshot.deployed();
+      const t = await MoonshotTrader.deployed();
 
       console.log("Moonshot at ", m.address);
       console.log("DropMoonshot at ", a.address);
+      console.log("Buy contract at ", t.address);
 
 
       // prepare airdrop 
@@ -31,6 +34,9 @@ q
       // set From
       await a.setFromTokenAddress( "0xd27d3f7f329d93d897612e413f207a4dbe8bf799" );
       //TestNet: await a.setFromTokenAddress( "0x4032bA66D4820229ce73cB026DFDD0E6F40822A8");
+
+      // set token address in buy contract
+      await t.setTokenAddress( m.address );
 
 
   }
