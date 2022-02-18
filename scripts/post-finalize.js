@@ -9,10 +9,7 @@ module.exports = async function(callback) {
       console.log("Moonshot at ", m.address);
 
       
-      // set moonshot fund address
-      await m.setMoonshotFundAddress("0x9d8a5d6B405c2Eb7cee724F4B2F67a902F0f0864");
-      await m.excludeFromFee("0x9d8a5d6B405c2Eb7cee724F4B2F67a902F0f0864");
-      
+            
       // set fees
       await m.setFees( 4, 3, 2);
 
@@ -20,11 +17,10 @@ module.exports = async function(callback) {
       await m.setSwapAndLiquifyEnabled( true );
 
 
-
       // open trading
       await m.unpause();
 
- 
+      console.log( "Trading is open" );
   }
   catch( error ) {
       console.log(error);

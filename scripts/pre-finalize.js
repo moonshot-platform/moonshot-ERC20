@@ -13,32 +13,32 @@ module.exports = async function(callback) {
       console.log("DropMoonshot at ", a.address);
       console.log("Buy contract at ", t.address);
 
+      // set moonshot fund address and exclude from fee
+      await m.setMoonshotFundAddress("0x9d8a5d6B405c2Eb7cee724F4B2F67a902F0f0864");
+      await m.excludeFromFee("0x9d8a5d6B405c2Eb7cee724F4B2F67a902F0f0864");
 
-      // prepare airdrop 
+      // disable tokenomics and trading except for owner
       await m.setSwapAndLiquifyEnabled( false );
       await m.setFees( 0 ,0 ,0 );
-
-      // halt trading except for owner
       await m.pause();
     
-      // whitelist airdrop contract
+      // whitelist moonshot claim contract
       await m.excludeFromReward( a.address );
       await m.excludeFromFee( a.address );
 
-      // set To
+      // set to token contract address in claim contract
       await a.setToTokenAddress( m.address );
 q
-      // add bitmart hacker to blacklist
+      // add bitmart hacker to blacklist of claim contract
       await a.addToBlackList( "0x25fb126B6c6B5c8EF732b86822fA0F0024E16C61" );
 
-      // set From
+      // set from token contract address in claim contract
       await a.setFromTokenAddress( "0xd27d3f7f329d93d897612e413f207a4dbe8bf799" );
-      //TestNet: await a.setFromTokenAddress( "0x4032bA66D4820229ce73cB026DFDD0E6F40822A8");
-
+     
       // set token address in buy contract
       await t.setTokenAddress( m.address );
 
-
+      console.log("Add Liquidity and Burn");
   }
   catch( error ) {
       console.log(error);
