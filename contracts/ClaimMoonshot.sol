@@ -13,8 +13,9 @@ Contract owner should:
   - set token from address
   - set token to address
  
- Contract must be funded
+Contract must be funded.
  
+Tokens funded can never be withdrawn.  
 
 */
 
@@ -181,10 +182,10 @@ contract ClaimMoonshot is Context, MiniOwnable {
     event SetFromTokenAddress(address newTokenContract);
     event SetToTokenAddress(address newTokenContract);
     event Claimed(address account, uint256 amount);
-    event Withdraw(address tokenContract, uint256 amount);
     event AddToBlackList(address account);
     event RemoveFromBlackList(address account);
     event RescueBNB(uint256 amount);
+    event Burn(uint256 amount);
 
     constructor () public {
     }
@@ -224,7 +225,7 @@ contract ClaimMoonshot is Context, MiniOwnable {
         require( contractAmount > 0 , "Out of tokens");
         require( amount <= contractAmount, "Not enough tokens");
 
-        IERC20(toContract).transfer( msg.sender, amount);
+        IERC20(toContract).transfer(msg.sender, amount);
 
         _claimed[ msg.sender ] = true;
         _totalClaimed += amount;
@@ -232,19 +233,19 @@ contract ClaimMoonshot is Context, MiniOwnable {
         emit Claimed(msg.sender, amount);
     }
 
-    function claimByOwner(address account) external onlyOwner {
+    function claimByOwner(address beneficiary) external onlyOwner {
 
-        require( !_claimed[account], "Already claimed");
-        require( !_isBlackListed[account], "Blacklisted account");
+        require( !_claimed[beneficiary], "Already claimed");
+        require( !_isBlackListed[beneficiary], "Blacklisted account");
 
-        uint256 amount = IERC20(fromContract).balanceOf(account);
+        uint256 amount = IERC20(fromContract).balanceOf(beneficiary);
         require( amount > 0, "Account balance must be greater than 0");
         
         uint256 contractAmount = IERC20(toContract).balanceOf( address(this) );
         require( contractAmount > 0 , "Out of tokens");
         require( amount <= contractAmount, "Not enough tokens");
 
-        IERC20(toContract).transfer( account , amount);
+        IERC20(toContract).transfer(beneficiary , amount);
 
         _claimed[ msg.sender ] = true;
         _totalClaimed += amount;
@@ -264,13 +265,20 @@ contract ClaimMoonshot is Context, MiniOwnable {
         emit RemoveFromBlackList(account);
     }
 
-    function withdraw(address tokenAddress) external onlyOwner {
-        uint256 amount = IERC20(tokenAddress).balanceOf(address(this));
-        IERC20(tokenAddress).transfer( msg.sender , amount);
-
-        emit Withdraw(tokenAddress, amount);
+    function isBlackListed(address account) external view returns(bool) {
+        return _isBlackListed[ account ];
     }
 
+    // owner can burn but not take
+    function burn() external onlyOwner {
+        address payable burnAddress = payable(0x000000000000000000000000000000000000dEaD);
+        uint256 tokenBalance = IERC20(toContract).balanceOf( address(this) );
+        require( tokenBalance > 0, "Token balance must be greater than 0");
+        IERC20(toContract).transfer(burnAddress, tokenBalance);
+        emit Burn(tokenBalance);
+    }
+
+    // BNB sent by mistake can be returned
     function rescueBNB() external onlyOwner {
         uint256 balance = address(this).balance;
 
