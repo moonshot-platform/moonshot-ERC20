@@ -727,6 +727,7 @@ contract Moonshot is Context, IERC20, Ownable {
 
     uint256 public _liquidityFee = 5;
     uint256 public _marketingFee = 1;
+    uint256 private _prevMarketingFee = _marketingFee;
     bool public paused = false;
 
     IUniswapV2Router02 public uniswapV2Router;
@@ -1078,14 +1079,17 @@ contract Moonshot is Context, IERC20, Ownable {
         
         _previousTaxFee = _taxFee;
         _prevTotalLiqFee = _totalLiqFee;
-        
+        _prevMarketingFee = _marketingFee;
+
         _taxFee = 0;
         _totalLiqFee = 0;
+        _marketingFee = 0;
     }
     
     function restoreAllFee() private {
         _taxFee = _previousTaxFee;
         _totalLiqFee = _prevTotalLiqFee;
+        _marketingFee = _prevMarketingFee;
     }
  
     function _approve(address owner, address spender, uint256 amount) private {
