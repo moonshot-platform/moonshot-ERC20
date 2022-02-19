@@ -1,12 +1,12 @@
 /*
 
-███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗███████╗██╗  ██╗ ██████╗ ████████╗
-████╗ ████║██╔═══██╗██╔═══██╗████╗  ██║██╔════╝██║  ██║██╔═══██╗╚══██╔══╝
-██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║███████╗███████║██║   ██║   ██║   
-██║╚██╔╝██║██║   ██║██║   ██║██║╚██╗██║╚════██║██╔══██║██║   ██║   ██║   
-██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║███████║██║  ██║╚██████╔╝   ██║   
-╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝  
-
+██████╗ ██╗   ██╗██╗   ██╗    ███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗███████╗██╗  ██╗ ██████╗ ████████╗
+██╔══██╗██║   ██║╚██╗ ██╔╝    ████╗ ████║██╔═══██╗██╔═══██╗████╗  ██║██╔════╝██║  ██║██╔═══██╗╚══██╔══╝
+██████╔╝██║   ██║ ╚████╔╝     ██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║███████╗███████║██║   ██║   ██║   
+██╔══██╗██║   ██║  ╚██╔╝      ██║╚██╔╝██║██║   ██║██║   ██║██║╚██╗██║╚════██║██╔══██║██║   ██║   ██║   
+██████╔╝╚██████╔╝   ██║       ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║███████║██║  ██║╚██████╔╝   ██║   
+╚═════╝  ╚═════╝    ╚═╝       ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝   
+                                                                                                       
 Let user buy moonshot through this contract
 
 */
@@ -467,7 +467,7 @@ contract BuyMoonshot is Context, MiniOwnable {
 
     event SetTokenAddress(address newTokenContract);
     event Withdraw(address tokenContract, uint256 amount);
-    event RescueBNB(uint256 amount);
+    event WithDrawBNB(uint256 amount);
     event BuyTokens(address account, uint256 amount);
     event SetRouterAddress(address newRouterAddress);
     event FeeEnabled(bool newState);
@@ -540,7 +540,7 @@ contract BuyMoonshot is Context, MiniOwnable {
         require(balance > 0, "Balance must be greater than 0");
         payable( msg.sender ).transfer( balance );
         
-        emit RescueBNB(balance);
+        emit WithDrawBNB(balance);
     }
   
     receive() external payable {
