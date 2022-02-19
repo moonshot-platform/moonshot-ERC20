@@ -23,7 +23,7 @@ Contract owner should:
  
 Contract must be funded.
  
-Tokens funded can never be withdrawn.  
+Tokens funded can never be withdrawn (but they can be burned by owner)
 
 */
 
