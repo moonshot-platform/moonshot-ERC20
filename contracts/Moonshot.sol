@@ -14,6 +14,13 @@ As the burn address participates as a holder, the supply is forever decreasing.
 
 Started out at DEFI meme token, moonshot features MoonBoxes and MoonSea.
 
+This contract features:
+ - pause/unpause and blacklisting for enhanced security
+ - router and pair address are dynamic
+ - rescue BNB or tokens sent by mistake
+ - higher precision fees
+ - fee can be setup per address
+
 */
 
 pragma solidity ^0.6.12;
@@ -696,7 +703,7 @@ contract Moonshot is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
 
     string private constant _name = "Moonshot";
-    string private constant _symbol = "MSHOT";
+    string private constant _symbol = "MSHOTv5";
     uint8 private constant _decimals = 9;
     
     uint256 public _taxFee = 400;
@@ -752,10 +759,10 @@ contract Moonshot is Context, IERC20, Ownable {
         _rOwned[_msgSender()] = _rTotal;
         
         // BSC MainNet, Pancakeswap Router
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+        //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
         // Ropsten, Uniswap Router
-        //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
         // BSC TestNet
         //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
