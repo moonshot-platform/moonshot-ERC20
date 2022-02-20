@@ -15,7 +15,6 @@ When the token has migrated a Claim button will be available on https://project-
 
 ChangeLog of the changes compared to the old Moonshot contract deployed at 0xd27d3f7f329d93d897612e413f207a4dbe8bf799
 
-
 ### Token Symbol "MSHOT"
 
 The token symbol was changed from MOONSHOT to MSHOT 
@@ -45,6 +44,13 @@ Old Fee structure: 4/6  (4% reflection, 6% LP )
 New Fee stucture: 4/4/2 (4% reflection, 3% LP , 2% dev )
 
 Fees cannot be set higher than 10% in total
+
+### Support for setting a fee per Address
+
+A function was added that the owner can use to configure a special fee for an address. 
+
+Fees cannot be set higher than 10% in total
+
 
 ### Smaller changes
 
