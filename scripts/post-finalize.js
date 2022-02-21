@@ -6,12 +6,7 @@ module.exports = async function(callback) {
         
       const m = await Moonshot.deployed();
 
-      console.log("Moonshot at ", m.address);
-
-      // open trading
-      await m.unpause();
-
-      console.log( "Trading is open" );
+    
   }
   catch( error ) {
       console.log(error);
