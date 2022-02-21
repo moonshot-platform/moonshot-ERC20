@@ -5,7 +5,7 @@
 ██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║███████╗███████║██║   ██║   ██║   
 ██║╚██╔╝██║██║   ██║██║   ██║██║╚██╗██║╚════██║██╔══██║██║   ██║   ██║   
 ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║███████║██║  ██║╚██████╔╝   ██║   
-╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝  
+╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝  v2
 
 Moonshot is a deflationary, frictionless yield and liquidity protocol.
 
@@ -703,7 +703,7 @@ contract Moonshot is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
 
     string private constant _name = "Moonshot";
-    string private constant _symbol = "MSHOTv5";
+    string private constant _symbol = "MSHOT";
     uint8 private constant _decimals = 9;
     
     uint256 public _taxFee = 400;
@@ -777,9 +777,10 @@ contract Moonshot is Context, IERC20, Ownable {
         //exclude owner and this contract from fee
         _hasSpecialFee[ owner() ] = true;
         _hasSpecialFee[ address(this) ] = true;
-        //exclude pair address
-        _hasSpecialFee[ uniswapV2Pair ] = true;
 
+        //exclude pair from receiving rewards
+        _isExcludedFromReward[ uniswapV2Pair ] = true;
+     
         _totalLiqFee = _liquidityFee.add(_projectFee);
         _prevTotalLiqFee = _totalLiqFee;
 
@@ -864,6 +865,10 @@ contract Moonshot is Context, IERC20, Ownable {
         require(rAmount <= _rTotal, "Amount must be less than total reflections");
         uint256 currentRate = _getRate();
         return rAmount.div(currentRate);
+    }
+
+    function getFeeForAddress(address account) external view returns (uint256) {
+        return  _specialFees[ account ];
     }
 
     function setPancakeRouterAddress(address newRouter) external onlyOwner() {
@@ -1158,8 +1163,7 @@ contract Moonshot is Context, IERC20, Ownable {
 
         // sell token and send BNB to project wallet if enabled 
         // also, don't get caught in a circular liquidity event.
-        // also, don't swap & liquify if sender is uniswap pair.
-        if( takeFee && !inSwapAndLiquify && from != uniswapV2Pair && _projectFee > 0) 
+        if( takeFee && !inSwapAndLiquify && _projectFee > 0) 
             swapAndFundProject( contractTokenBalance );
       
         
