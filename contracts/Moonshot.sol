@@ -727,9 +727,7 @@ contract Moonshot is Context, IERC20, Ownable {
     
     bool public swapAndLiquifyEnabled = true;
     bool public swapAndLiquifyMaxAmountEnabled = true;
-    
-    bool public paused = true;
-    
+        
     event SwapAndLiquifyEnabledUpdated(bool enabled);
     event SwapAndLiquify(uint256 tokensSwapped, uint256 bnbReceived, uint256 tokensIntoLiquidity);
     event SwapAndLiquifyMaxAmountEnabled(bool enabled, uint256 maxTokenIntoLiquidity);
@@ -737,7 +735,7 @@ contract Moonshot is Context, IERC20, Ownable {
     event SetPancakeRouterAddress(address newRouter, address pair);
     event SetPancakePairAddress(address newPair);
     event SetMoonshotFundAddress(address newAddress);
-    event SetFees(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newMarketingFee);
+    event SetFees(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newProjectFee);
     event ExcludeFromReward(address account);
     event IncludeInReward(address account);
     event SetFee(address account, uint256 newFee, bool enabled);
@@ -746,8 +744,6 @@ contract Moonshot is Context, IERC20, Ownable {
     event SetNumTokensSellToAddToLiquidity(uint256 amount);
     event RescueBNB(uint256 amount);
     event RescueToken(address tokenAddress, uint256 amount);
-    event Pause();
-    event UnPause();
 
     modifier lockTheSwap {
         inSwapAndLiquify = true;
@@ -902,15 +898,15 @@ contract Moonshot is Context, IERC20, Ownable {
         emit SetMoonshotFundAddress(moonshotFundAddress);
     }
 
-   function setFees(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newMarketingFee) external onlyOwner() {
-        require( (newRewardFee + newLiquidityFee + newMarketingFee) <= 1000, "Total fees must be <= 1000" );
+   function setFees(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newProjectFee) external onlyOwner() {
+        require( (newRewardFee + newLiquidityFee + newProjectFee) <= 1000, "Total fees must be <= 1000" );
         
         _taxFee = newRewardFee;
         _liquidityFee = newLiquidityFee;
-        _projectFee = newMarketingFee;
+        _projectFee = newProjectFee;
         _totalLiqFee = _liquidityFee.add(_projectFee);
         
-        emit SetFees(newRewardFee, newLiquidityFee, newMarketingFee);
+        emit SetFees(newRewardFee, newLiquidityFee, newProjectFee);
     }
 
     function setFee(address account, uint256 newFee, bool enabled) external onlyOwner {
@@ -990,25 +986,7 @@ contract Moonshot is Context, IERC20, Ownable {
 
         emit RescueBNB(amount);
     }
-  
-    // sometimes, tokens are sent to the contract by mistake
-    function rescueToken(address tokenAddress, uint256 amount) external onlyOwner {
-        IERC20(tokenAddress).transfer( msg.sender , amount);
-
-        emit RescueToken(tokenAddress, amount);
-    }
-
-    // owner has the ability to pause transfer of tokens until unpaused
-    function pause() external onlyOwner {
-        paused = true;
-        emit Pause();
-    }
-
-    function unpause() external onlyOwner {
-        paused = false;
-        emit UnPause();        
-    }
-
+ 
     function _reflectFee(uint256 rFee, uint256 tFee) private {
         _rTotal = _rTotal.sub(rFee);
         _tFeeTotal = _tFeeTotal.add(tFee);
@@ -1131,8 +1109,6 @@ contract Moonshot is Context, IERC20, Ownable {
         require(amount > 0, "Transfer amount must be greater than zero");
         require(!_isBlackListed[from], "From address is blacklisted");
         require(!_isBlackListed[to], "To address is blacklisted");
-        if(from != owner() && to != owner())
-            require(!paused, "Paused");
 
         uint256 contractTokenBalance = balanceOf(address(this));
         bool overMinTokenBalance = contractTokenBalance > numTokensSellToAddToLiquidity;
