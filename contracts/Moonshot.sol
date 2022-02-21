@@ -867,6 +867,10 @@ contract Moonshot is Context, IERC20, Ownable {
         return rAmount.div(currentRate);
     }
 
+    function isFeeForAddressEnabled(address account) external view returns (bool) {
+        return _hasSpecialFee[ account ];
+    }
+
     function getFeeForAddress(address account) external view returns (uint256) {
         return  _specialFees[ account ];
     }
@@ -1146,26 +1150,18 @@ contract Moonshot is Context, IERC20, Ownable {
         // tokens that we need to initiate a swap + liquidity lock?
         // also, don't get caught in a circular liquidity event.
         // also, don't swap & liquify if sender is uniswap pair.
-        // also, don't swap if fee is zero
         if (
             overMinTokenBalance &&
             !inSwapAndLiquify &&
             from != uniswapV2Pair &&
-            swapAndLiquifyEnabled &&
-            _totalLiqFee > 0
+            swapAndLiquifyEnabled
         ) {
             if( swapAndLiquifyMaxAmountEnabled ) {
                 contractTokenBalance = numTokensSellToAddToLiquidity;
             }
-            //add liquidity
+            
             swapAndLiquify(contractTokenBalance);
         }
-
-        // sell token and send BNB to project wallet if enabled 
-        // also, don't get caught in a circular liquidity event.
-        if( takeFee && !inSwapAndLiquify && _projectFee > 0) 
-            swapAndFundProject( contractTokenBalance );
-      
         
         //transfer amount, it will deduct fee and reflect tokens
         _tokenTransfer(from,to,amount);
@@ -1176,7 +1172,9 @@ contract Moonshot is Context, IERC20, Ownable {
 
     function swapAndLiquify(uint256 tAmount) private lockTheSwap {
         uint256 forLiquidity = tAmount.div(_totalLiqFee).mul(_liquidityFee);
-        if(forLiquidity > 0)
+        uint256 forWallets = tAmount.sub(forLiquidity);
+
+        if(forLiquidity > 0 && _liquidityFee > 0)
         {
             // sell half the tokens for BNB and add liquidity
             uint256 half = forLiquidity.div(2);
@@ -1188,14 +1186,8 @@ contract Moonshot is Context, IERC20, Ownable {
             addLiquidity(otherHalf, newBalance);
             emit SwapAndLiquify(half, newBalance, otherHalf);
         }
-
-    }
-
-    function swapAndFundProject(uint256 tAmount) private lockTheSwap {
-        uint256 forLiquidity = tAmount.div(_totalLiqFee).mul(_liquidityFee);
-        uint256 forWallets = tAmount.sub(forLiquidity);
                 
-        if(forWallets > 0)
+        if(forWallets > 0 && _projectFee > 0) 
         {
             // sell tokens for BNB and send to project fund
             uint256 initialBalance = address(this).balance;
@@ -1205,6 +1197,7 @@ contract Moonshot is Context, IERC20, Ownable {
 
             emit SwapAndFundProject(newBalance);
         }
+
     }
 
     function swapTokensForBNB(uint256 tokenAmount) private {
@@ -1297,7 +1290,6 @@ contract Moonshot is Context, IERC20, Ownable {
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
-
 
      //to receive BNB from pancakeV2Router when swapping
     receive() external payable {}
