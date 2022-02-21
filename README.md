@@ -14,8 +14,8 @@ The contract takes a 10% fee:
  - 2% is added to the Moonshot support fund
 
 Notes:
-- The contract contains functions for the owner to blacklist addresses and to pause the transfer() function
-- Tokens sent to the contract can be rescued
+- The contract contains functions for the owner to blacklist addresses 
+- BNB sent to the contract can be rescued
 - There is no max TX amount and the total fees can be set to at most 10%
 - The router can be upgraded
 

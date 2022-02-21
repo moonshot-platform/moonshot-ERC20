@@ -21,7 +21,7 @@ The token symbol was changed from MOONSHOT to MSHOT
 
 ### Enhanced Security
 
-Moonshot can be more "reactive" to threats because of the ability to pause and blacklist addresses.
+Moonshot can be more "reactive" to threats because of the ability to blacklist addresses.
 
 ### Upgradable
 
@@ -30,10 +30,6 @@ The addresses for the Pancake Router and Pancake pair can be upgraded
 ### Set Max TX Amount
 
 This function was removed
-
-### Rescue Tokens
-
-Tokens sent to the contract by mistake can be rescued
 
 ### Fee Mechanism
 
