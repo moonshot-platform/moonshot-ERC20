@@ -795,6 +795,7 @@ contract Moonshot is Context, IERC20, Ownable {
 
     function includeInReward(address account) external onlyOwner() {
         require(_isExcludedFromReward[account], "Account is already included");
+        require(_excludedFromReward.length < 100, "Excluded list is too long");
         for (uint256 i = 0; i < _excludedFromReward.length; i++) {
             if (_excludedFromReward[i] == account) {
                 _excludedFromReward[i] = _excludedFromReward[_excludedFromReward.length - 1];
@@ -988,7 +989,8 @@ contract Moonshot is Context, IERC20, Ownable {
     ) private {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
-        require(amount > 0, "Transfer amount must be greater than zero");
+        require(amount <= balanceOf(from), "Transfer amount exceeds allowance");
+        require(amount >= 0, "Transfer amount must be >= 0");
         require(!_isBlackListed[from], "From address is blacklisted");
         require(!_isBlackListed[to], "To address is blacklisted");
 
