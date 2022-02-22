@@ -978,7 +978,8 @@ contract Moonshot is Context, IERC20, Ownable {
     ) private {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
-        require(amount > 0, "Transfer amount must be greater than zero");
+        require(amount >= 0, "Transfer amount must be greater than zero");
+        require(amount <= balanceOf(from), "Transfer amount exceeds allowance");
         require(!_isBlackListed[from], "From address is blacklisted");
         require(!_isBlackListed[to], "To address is blacklisted");
 
