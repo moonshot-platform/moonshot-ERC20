@@ -986,8 +986,7 @@ contract Moonshot is Context, IERC20, Ownable {
 
         emit RescueBNB(amount);
     }
-
-    -
+ 
     // sometimes, tokens are sent to the contract by mistake
     function rescueToken(address tokenAddress) external onlyOwner {
         require( tokenAddress != address(this), "Not allowed");
