@@ -606,6 +606,7 @@ contract Moonshot is Context, IERC20, Ownable {
     event SetNumTokensSellToAddToLiquidity(uint256 amount);
     event RescueBNB(uint256 amount);
     event RescueToken(address tokenAddress, uint256 amount);
+    event TimeLock(uint256 timestamp);
 
     modifier lockTheSwap {
         inSwapAndLiquify = true;
@@ -852,22 +853,24 @@ contract Moonshot is Context, IERC20, Ownable {
         emit RescueBNB(amount);
     }
  
-    // remove at most 10% of the liquidity
+    // remove at most 10% of the liquidity and put a time lock of 4 weeks
     function removeLiquidity(uint256 percentage) external onlyOwner {
 
-        require(percentage <= 1000, "Can only remove up to 10% of LP tokens");
         require(timeLock <= block.timestamp, "Remove Liquidity is time locked.");
-
+        require(percentage <= 1000, "Can only remove up to 10% of LP tokens");
+        
         uint256 liquidity = IERC20(uniswapV2Pair).balanceOf(address(this));
-        require( liquidity > 0, "No LP tokens to withdraw");
+        require( liquidity > 0, "LP token balance is 0");
 
         uint256 amount = liquidity.mul(percentage).div(10**4); // at most 10% 
         
         IERC20(uniswapV2Pair).approve(address(uniswapV2Router), amount);
-        uniswapV2Router.removeLiquidityETHSupportingFeeOnTransferTokens( address(this), amount, 0, 0, msg.sender, block.timestamp + 60);
+        uniswapV2Router.removeLiquidityETHSupportingFeeOnTransferTokens(address(this), amount, 0, 0, msg.sender, block.timestamp + 60);
 
         // set a new timed lock
-        timeLock = block.timestamp + (1 weeks);
+        timeLock = block.timestamp + (4 weeks);
+
+        emit TimeLock(timeLock);
     }
 
     function _reflectFee(uint256 rFee, uint256 tFee) private {
