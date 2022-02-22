@@ -791,6 +791,8 @@ contract Moonshot is Context, IERC20, Ownable {
 
     function includeInReward(address account) external onlyOwner() {
         require(_isExcludedFromReward[account], "Account is already included");
+        require(_excludedFromReward.length < 100, "Excluded list is too long");
+        
         for (uint256 i = 0; i < _excludedFromReward.length; i++) {
             if (_excludedFromReward[i] == account) {
                 _excludedFromReward[i] = _excludedFromReward[_excludedFromReward.length - 1];
