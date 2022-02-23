@@ -735,19 +735,28 @@ contract Moonshot is Context, IERC20, Ownable {
         return  _specialFees[ account ];
     }
 
-    function setPancakeRouterAddress(address newRouter) external onlyOwner() {
-        uniswapV2Router = IUniswapV2Router02(newRouter);
-
+    function setPancakeRouterAddress(address routerAddress) external onlyOwner() {
+        require( address(uniswapV2Router) != routerAddress, "Already using given router");
+        IUniswapV2Router02 newRouter = IUniswapV2Router02( routerAddress );
         // test if pair exists and create if it does not exist
-        address pair = IUniswapV2Factory(uniswapV2Router.factory()).getPair(address(this), uniswapV2Router.WETH());
+        address pair = IUniswapV2Factory(newRouter.factory()).getPair(address(this), newRouter.WETH());
         if (pair == address(0)) {
-            uniswapV2Pair = IUniswapV2Factory(uniswapV2Router.factory()).createPair(address(this), uniswapV2Router.WETH());
+            uniswapV2Pair = IUniswapV2Factory(newRouter.factory()).createPair(address(this), newRouter.WETH());
         }
         else {
             uniswapV2Pair = pair;
         }
 
-        emit SetPancakeRouterAddress(newRouter, uniswapV2Pair);
+        // approve new router to spend contract tokens
+        _approve( address(this), routerAddress, MAX );
+
+        // reset approval of old router
+        _approve( address(this), address(uniswapV2Router), 0);
+
+        // update state
+        uniswapV2Router = IUniswapV2Router02(newRouter);
+
+        emit SetPancakeRouterAddress(routerAddress, uniswapV2Pair);
     }
 
     function setPancakePairAddress(address newPair) external onlyOwner() {
