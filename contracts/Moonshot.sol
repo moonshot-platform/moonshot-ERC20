@@ -15,9 +15,9 @@ As the burn address participates as a holder, the supply is forever decreasing.
 Started out at DEFI meme token, moonshot features MoonBoxes and MoonSea.
 
 This contract features:
- - pause/unpause and blacklisting for enhanced security
+ - blacklisting for enhanced security
  - router and pair address are dynamic
- - rescue BNB or tokens sent by mistake
+ - rescue BNB sent by mistake
  - higher precision fees
  - fee can be setup per address
 
@@ -605,7 +605,6 @@ contract Moonshot is Context, IERC20, Ownable {
     event RemoveFromBlackList(address account);
     event SetNumTokensSellToAddToLiquidity(uint256 amount);
     event RescueBNB(uint256 amount);
-    event RescueToken(address tokenAddress, uint256 amount);
     event TimeLock(uint256 timestamp);
 
     modifier lockTheSwap {
