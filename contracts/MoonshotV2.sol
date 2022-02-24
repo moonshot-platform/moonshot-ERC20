@@ -16,6 +16,7 @@ Started out at DEFI meme token, moonshot features MoonBoxes and MoonSea.
 
 This contract features:
  - blacklisting for enhanced security
+ - buy back mechanism
  - router and pair address are dynamic
  - rescue BNB sent by mistake
  - higher precision fees
@@ -56,8 +57,8 @@ contract MoonshotV2 is Context, IERC20, Ownable {
     uint256 private _tTotal = 1000000000 * 10**6 * 10**9;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
 
-    string private constant _name = "MoonOCean";
-    string private constant _symbol = "MMOCEAN";
+    string private constant _name = "Moonshot";
+    string private constant _symbol = "MSHOT";
     uint8 private constant _decimals = 9;
     
     uint256 public _taxFee = 400;
