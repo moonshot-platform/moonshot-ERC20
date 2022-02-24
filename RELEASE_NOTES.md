@@ -32,13 +32,17 @@ Adding to the Liquidity Pool generates LP tokens. These tokens accumulate over t
 This token contract changes that; The LP tokens will accumulate in the contract address instead and a removeLiquidity function was added that allows
 the owner to remove at most 10% of the liquidity every 4 weeks.
 
+### Buy Back mechanism
+
+The contract will accumulate BNB and execute buy-and-transfer or buy-and-burn transactions
+
 ### Fee Mechanism
 
 The total fees are the same as the old contract, but now the 6% reserved for adding to the Liquidity Pool has changed
-to 4% and 2% to support the project's development and marketing costs.
+to 4% ,  1.5% and 0.5% to support the project's development and marketing costs and buy back mechanism.
 
 Old Fee structure: 4/6  (4% reflection, 6% LP )
-New Fee stucture: 4/4/2 (4% reflection, 3% LP , 2% dev )
+New Fee stucture: 4/4/2 (4% reflection, 3% LP , 1.5% dev, 0.5% buyback )
 
 Fees cannot be set higher than 10% in total
 
@@ -72,3 +76,4 @@ BNB sent to the contract by mistake can be rescued
 - Naming things, fixed typos
 
 
+https://github.com/moonshot-platform/moonshot-ERC20/blob/removeLiquidity/RELEASE_NOTES.md
