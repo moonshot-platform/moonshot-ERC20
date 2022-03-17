@@ -278,7 +278,7 @@ contract MoonshotV2 is Context, IERC20, Ownable {
     }
 
    function setFees(uint256 newRewardFee, uint256 newLiquidityFee, uint256 newProjectFee, uint256 newBuyBackFee) external onlyOwner() {
-        require( (newRewardFee.add(newLiquidityFee).add(newProjectFee)) <= 1000, "Total fees must be <= 1000" );
+        require( (newRewardFee.add(newLiquidityFee).add(newProjectFee).add(newBuyBackFee)) <= 1000, "Total fees must be <= 1000" );
         
         _taxFee = newRewardFee;
         _liquidityFee = newLiquidityFee;
