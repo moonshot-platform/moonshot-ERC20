@@ -577,8 +577,8 @@ contract MoonshotV2 is Context, IERC20, Ownable {
     }
 
     function swapAndLiquify(uint256 tAmount) private lockTheSwap {
-        uint256 forLiquidity = tAmount.div(_totalLiqFee).mul(_liquidityFee);
-        uint256 forBuyBack = tAmount.div(_totalLiqFee).mul(_buyBackFee);
+        uint256 forLiquidity = tAmount.mul(_liquidityFee).div(_totalLiqFee);
+        uint256 forBuyBack = tAmount.mul(_buyBackFee).div(_totalLiqFee);
         uint256 forWallets = tAmount.sub(forLiquidity).sub(forBuyBack);
         
         if(forLiquidity > 0 && _liquidityFee > 0)
