@@ -24,7 +24,7 @@ module.exports = {
             network_id: 97,
             confirmations: 2,
             timeoutBlocks: 200,
-            gas: 10000000,
+            gas: 1000000,
             skipDryRun: true
     },
     ropsten: {
@@ -32,7 +32,8 @@ module.exports = {
             network_id: 3,
             confirmation: 10,
             timeoutBlocks: 200,
-            skipDryRun: true
+          //  gas: 10000000,
+            skipDryRun: true,
     },
     bsc: {
         provider: () => new HDWalletProvider( process.env.PRIVKEY, 'https://bsc-dataseed1.binance.org'),
@@ -44,7 +45,8 @@ module.exports = {
     }
   },
   plugins: [
-      'truffle-plugin-verify'
+      'truffle-plugin-verify',
+      'truffle-contract-size'
   ],
   api_keys: {
       bscscan: process.env.APIKEY,
