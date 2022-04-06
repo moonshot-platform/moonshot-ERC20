@@ -10,8 +10,8 @@ Deflationary, Frictionless yield and liquidity generation protocol. Simply hold 
 
 The contract takes a 10% fee:
  - 4% is redistributed to all holders
- - 4% is added to the V2 LP pool
- - 2% is added to the Moonshot support fund
+ - 3% is added to the V2 LP pool
+ - 3% is added to the Moonshot support fund
 
 Notes:
 - The contract contains functions for the owner to blacklist addresses 
