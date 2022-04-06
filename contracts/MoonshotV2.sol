@@ -317,7 +317,7 @@ contract MoonshotV2 is Context, IERC20, Ownable {
     function setBuyBackAddress(address newAddress) external onlyOwner() {
         buyBackAddress = payable(newAddress);
 
-        emit SetBuyBackAddress(moonshotFundAddress);
+        emit SetBuyBackAddress(buyBackAddress);
     }
 
     function excludeFromReward(address account) external onlyOwner() {
