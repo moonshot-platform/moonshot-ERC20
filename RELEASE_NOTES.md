@@ -42,7 +42,7 @@ The total fees are the same as the old contract, but now the 6% reserved for add
 to 4% ,  1.5% and 0.5% to support the project's development and marketing costs and buy back mechanism.
 
 Old Fee structure: 4/6  (4% reflection, 6% LP )
-New Fee stucture: 4/4/2 (4% reflection, 3% LP , 1.5% dev, 0.5% buyback )
+New Fee stucture: 4/3/3 (4% reflection, 3% LP , 3% dev )
 
 Fees cannot be set higher than 10% in total
 
